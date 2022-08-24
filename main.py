@@ -35,9 +35,6 @@ class VideoWindow(QMainWindow):
         
         self.video_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
-        self.is_finished = True
-        self.thread = None
-
         self.record_start_time = None
         self.record_end_time = None
         self.video_name = ""
@@ -74,7 +71,7 @@ class VideoWindow(QMainWindow):
 
         self.layout_operation = QHBoxLayout()
         self.layout_operation.setContentsMargins(0, 0, 0, 0)
-        self.label_rotate = QLabel('Degree of rotation (clockwise)')
+        self.label_rotate = QLabel('Degree of rotation (counterclockwise)')
         self.combobox_degree = QComboBox()
         degrees = ['0', '90', '180', '270']
         self.combobox_degree.addItems(degrees)
@@ -299,7 +296,6 @@ class VideoWindow(QMainWindow):
             self.statusbar.showMessage(
                 "Info: Please wait until the process ends.")
             self.thread = Thread()
-            self.is_finished = False
             self.thread.set_params(Thread.MSG_CUT_VIDEO, self.video_name, 
                 self.record_start_time / 1000, self.record_end_time / 1000, self.combobox_degree.currentText())
             self.thread.signal_return_value.connect(self.thread_done)
@@ -310,7 +306,6 @@ class VideoWindow(QMainWindow):
             self.statusbar.showMessage(
                 "Info: Please wait until the process ends.")
             self.thread = Thread()
-            self.is_finished = False
             self.thread.set_params(Thread.MSG_EXTRACT_AUDIO, self.video_name, 
                 self.record_start_time / 1000, self.record_end_time / 1000)
             self.thread.signal_return_value.connect(self.thread_done)
@@ -325,15 +320,8 @@ class VideoWindow(QMainWindow):
 
     def thread_done(self, return_value, video_name):
         if return_value:
-            self.is_finished = True
             self.statusbar.showMessage(
                 "Info: The process has done and saved as {}.".format(video_name))
-
-    def closeEvent(self, event):
-        if not self.is_finished:
-            self.thread.stop()
-        event.accept()
-
 
 if __name__ == '__main__':
     """
